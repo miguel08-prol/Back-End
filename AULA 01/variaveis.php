@@ -1,6 +1,8 @@
 <?php
 # Atividade 1
-/*Desenvolva um codigo com a mesma estrutura abaixo ,porém com seu dados*/ 
+/*Desenvolva um codigo com a mesma estrutura abaixo ,porém com seu dados*/
+
+use Dom\Element;
 
 echo "olá! \n";
 $nome  = "Miguel \n";
