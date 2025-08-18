@@ -1,36 +1,58 @@
 <?php
 
-$marca_carro1 = "Honda";
-$modelo_carro1 = "Civic";
-$ano_carro1 = 2016; 
-$revisao_carro1 = true;
-$donos_carro1 = 2;
 
+$carro1 = [
+    "marca" => "Honda",
+    "modelo" => "Civic",
+    "ano" => 2016,
+    "revisao" => true,
+    "donos" => 2,
+];
 
+$carro2 = [
+    "marca" => "BMW",
+    "modelo" => "320i",
+    "ano" => 2012,
+    "revisao" => true,
+    "donos" => 5,
+];
 
-function exibirDetalhesCarro($marca, $modelo, $ano, $revisao, $donos) {
+$carro3 = [
+    "marca" => "FIAT",
+    "modelo" => "uno",
+    "ano" => 2005,
+    "revisao" => false,
+    "donos" => 1,
+];
 
-$status_revisao = $revisao ? "Sim" : "Não";
+$carro4 = [
+    "marca" => "Volkswagen",
+    "modelo" => "jetta",
+    "ano" => 2020,
+    "revisao" => true,
+    "donos" => 7,
+];
 
-echo "Marca: " . $marca . "\n";
-echo "Modelo: " . $modelo . "\n";
-echo "Ano: " . $ano . "\n";
-echo "Revisão: " . $status_revisao . "\n";
-echo "Donos: " . $donos . "\n";
-echo "\n";
+//Exercicio 1
+function exibirDetalhesCarro($carro) {
+    $status_revisao = $carro['revisao'] ? "Sim" : "Não";
+
+    echo "Marca: {$carro['marca']}\n";
+    echo "Modelo: {$carro['modelo']}\n";
+    echo "Ano: {$carro['ano']}\n";
+    echo "Revisão: {$status_revisao}\n";
+    echo "Donos: {$carro['donos']}\n";
+    echo "\n";
 }
 
-exibirDetalhesCarro($marca_carro1, $modelo_carro1, $ano_carro1, $revisao_carro1, $donos_carro1);
-
-// Função do exercício 2
+//Exercicio 2
 function ehSeminovo($ano) {
     $anoAtual = date("Y");
     $idade = $anoAtual - $ano;
     return $idade <= 3;
-    
 }
 
-// Função do exercício 3
+//Exercicio 3
 function precisaRevisao($revisao, $ano) {
     if (!$revisao && $ano < 2022) {
         return "Precisa de revisão";
@@ -39,29 +61,31 @@ function precisaRevisao($revisao, $ano) {
     }
 }
 
-// Função do exercício 4
-function calcularValor($marca, $ano, $Ndonos) {
+//Exercicio 4
+function calcularValor($marca, $ano, $donos) {
     $anoAtual = date("Y");
     $valorBase = 0;
 
     switch (strtolower($marca)) {
-        case 'bmw':
-        case 'porsche':
-            $valorBase = 300000;
-            break;
-        case 'nissan':
+        case 'BMW':
             $valorBase = 70000;
             break;
-        case 'byd':
-            $valorBase = 150000;
+        case 'honda':
+            $valorBase = 90000;
+            break;
+        case 'fiat':
+            $valorBase = 45000;
+            break;
+        case 'volkswagen':
+            $valorBase = 110000;
             break;
         default:
-            $valorBase = 50000; 
+            $valorBase = 50000;
             break;
     }
 
-    if ($Ndonos > 1) {
-        $descontoDonos = ($Ndonos - 1) * 0.05;
+    if ($donos > 1) {
+        $descontoDonos = ($donos - 1) * 0.05;
         $valorBase *= (1 - $descontoDonos);
     }
 
@@ -75,26 +99,24 @@ function calcularValor($marca, $ano, $Ndonos) {
     return round($valorBase, 2);
 }
 
-
-function testarFuncoes() {
-    $carros = [
-        ['marca' => 'BMW', 'ano' => 2022, 'Ndonos' => 1, 'revisao' => true],
-        ['marca' => 'Nissan', 'ano' => 2020, 'Ndonos' => 2, 'revisao' => false],
-        ['marca' => 'BYD', 'ano' => 2019, 'Ndonos' => 3, 'revisao' => false],
-        ['marca' => 'Porsche', 'ano' => 2021, 'Ndonos' => 1, 'revisao' => true],
-        ['marca' => 'Fiat', 'ano' => 2018, 'Ndonos' => 4, 'revisao' => false],
-    ];
-
+function testarFuncoes($carros) {
     foreach ($carros as $carro) {
-        echo "Marca: {$carro['marca']}, Ano: {$carro['ano']}, Donos: {$carro['Ndonos']}\n";
-        echo "É seminovo? " . (ehSeminovo($carro['ano']) ? "Sim" : "Não") . "\n";
-        echo "Status da revisão: " . precisaRevisao($carro['revisao'], $carro['ano']) . "\n";
-        echo "Valor estimado: R$ " . number_format(calcularValor($carro['marca'], $carro['ano'], $carro['Ndonos']), 2, ',', '.') . "\n";
         echo "---------------------------------------\n";
+        exibirDetalhesCarro($carro);
+        
+        $ehSeminovo = ehSeminovo($carro['ano']) ? "Sim" : "Não";
+        $statusRevisao = precisaRevisao($carro['revisao'], $carro['ano']);
+        $valorEstimado = calcularValor($carro['marca'], $carro['ano'], $carro['donos']);
+        
+        printf("É seminovo? %s\n", $ehSeminovo);
+        printf("Status da revisão: %s\n", $statusRevisao);
+        printf("Valor estimado: R$ %s\n\n", number_format($valorEstimado, 2, ',', '.'));
     }
+    echo "---------------------------------------\n";
 }
 
 
-testarFuncoes();
+$meusCarros = [$carro1, $carro2, $carro3, $carro4];
+testarFuncoes($meusCarros);
 
 ?>
