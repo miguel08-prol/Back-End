@@ -1,18 +1,33 @@
 <?php
 
-
 $marca_carro1 = "Honda";
 $modelo_carro1 = "Civic";
-$ano_carro1 = "2016";
+$ano_carro1 = 2016; 
 $revisao_carro1 = true;
 $donos_carro1 = 2;
 
+
+
+function exibirDetalhesCarro($marca, $modelo, $ano, $revisao, $donos) {
+
+$status_revisao = $revisao ? "Sim" : "Não";
+
+echo "Marca: " . $marca . "\n";
+echo "Modelo: " . $modelo . "\n";
+echo "Ano: " . $ano . "\n";
+echo "Revisão: " . $status_revisao . "\n";
+echo "Donos: " . $donos . "\n";
+echo "\n";
+}
+
+exibirDetalhesCarro($marca_carro1, $modelo_carro1, $ano_carro1, $revisao_carro1, $donos_carro1);
 
 // Função do exercício 2
 function ehSeminovo($ano) {
     $anoAtual = date("Y");
     $idade = $anoAtual - $ano;
     return $idade <= 3;
+    
 }
 
 // Função do exercício 3
@@ -41,7 +56,7 @@ function calcularValor($marca, $ano, $Ndonos) {
             $valorBase = 150000;
             break;
         default:
-            $valorBase = 50000; // Valor base para outras marcas
+            $valorBase = 50000; 
             break;
     }
 
@@ -60,7 +75,7 @@ function calcularValor($marca, $ano, $Ndonos) {
     return round($valorBase, 2);
 }
 
-// Função principal para testar as outras funções
+
 function testarFuncoes() {
     $carros = [
         ['marca' => 'BMW', 'ano' => 2022, 'Ndonos' => 1, 'revisao' => true],
@@ -79,7 +94,7 @@ function testarFuncoes() {
     }
 }
 
-// Executa os testes
+
 testarFuncoes();
 
 ?>
