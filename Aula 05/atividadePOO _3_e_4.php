@@ -12,7 +12,7 @@ public $Endereco;
 
 public $CEP;
 
-function __construct($Nome,$CPF,$Sexo,$Email,$Estado_civil,$Cidade,$Estado,$Endereco,$CEP) {
+public function __construct($Nome,$CPF,$Sexo,$Email,$Estado_civil,$Cidade,$Estado,$Endereco,$CEP) {
 $this->Nome = $Nome;
 $this->CPF = $CPF;
 $this->Sexo = $Sexo;
@@ -21,7 +21,20 @@ $this->Estado_civil = $Estado_civil;
 $this->Cidade = $Cidade;
 $this->Endereco = $Endereco;
 $this ->CEP = $CEP;
-}}
+}
+public function testando_Reservista() {
+    if ($this->Sexo == "Masculino") {echo "Apresente seu certificado de reservista do tiro de guerra!";}else {echo "Tudo certo";}
+}
+
+public function Casamento($anos_casado) {
+        
+        if (strtolower($this->Estado_civil) === 'casado') {
+            echo "Parabéns pelo seu casamento de " . $anos_casado . " anos!";
+        } else {
+            echo "oloco";
+        }
+    }
+}
 
 //Exercicio 4
 
@@ -36,16 +49,8 @@ $usuario2 = new Usuario("Valentina Passos Scherrer","070.070.060-70","Feminino",
 $usuario3 = new Usuario("Claudio Braz Nepumoceno","575.575.242-32","Masculino","Clauclau.nepumoceno@gmail.com",
 "Solteiro","Piripiri","Piauí","Estrada 3, 33","12345-99");
 
-
-
-
-
-
-
-
-
-
-
+$Usuario1 -> testando_Reservista();
+$usuario2 -> Casamento(12);
 
 
 

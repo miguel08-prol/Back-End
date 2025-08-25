@@ -7,11 +7,19 @@ public $Raça;
 public $Castrado;
 public $Sexo;
 
-function __construct($Nome,$Raça,$Castrado,$Sexo){
+public function __construct($Nome,$Raça,$Castrado,$Sexo){
 $this->Nome = $Nome;
 $this->Raça = $Raça;
 $this->Castrado = $Castrado;
 $this->Sexo = $Sexo;
+}
+
+public function latir() {
+echo "O cachorro $this->Nome está latindo!";
+}
+
+public function marcar_território() {
+echo "O cachorro $this->Nome da raça $this->Raça está marcando território";
 }
 };
 //Exercicio 2
@@ -35,17 +43,5 @@ $Cachorro9 = new Cachorro("Max","Poodle",true,"M");
 
 $Cachorro10 = new Cachorro("Luna","Beagle",False,"F");
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-?>
+$Cachorro1 ->latir();
+$Cachorro2 ->marcar_território();
