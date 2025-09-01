@@ -11,7 +11,7 @@ private $Senha;
 public function __construct($Nome,$CPF,$Telefone,$Idade,$Email,$Senha) {
 $this->setNome($Nome);
 $this->setCPF($CPF);
-$this->setTelefone($Idade);
+$this->setTelefone($Telefone);
 $this->setIdade($Idade);
 $this->Email = $Email;
 $this->Senha = $Senha;
