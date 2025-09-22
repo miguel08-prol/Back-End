@@ -6,12 +6,12 @@ private $associacao;
 private $pontuacao;
 
 
-public function __construct($Jogadores,$modalidade,$associacao) {
+public function __construct($Jogadores,$modalidade,$associacao,$pontuacao) {
 
 $this->setjogadores($Jogadores);
 $this->setModalidade($modalidade);
 $this->setAssociacao($associacao);
-
+$this->setPonto($pontuacao);
 
 
 }
