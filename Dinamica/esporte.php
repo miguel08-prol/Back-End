@@ -16,7 +16,7 @@ $this->setPonto($pontuacao);
 
 }
 
-public function getJogadores() {
+public function getJogadores() {  
 return $this->Jogadores;
 
 }
@@ -89,7 +89,5 @@ $jogo2->jogaFeridos(2);
 
 $jogo3->adicionarPontuacao(300);
 $jogo3->jogaFeridos(5);
-
-
 
 ?>
