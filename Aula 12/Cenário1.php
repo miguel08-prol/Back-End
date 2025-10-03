@@ -2,7 +2,7 @@
 //Classe->Substantivos e Métodos->Verbos
 
 //Classes:Turistas
-//Subclasses:Brasil,Japão e Acre.
+
 
 //Métodos:Comer comidadas típicas e nadar em rios ou praias.
 
@@ -40,7 +40,19 @@ public function getLazer() {
 $this->lazer;
 }
 
+public function comidadastípicas() {
+return "Pais:".$this->local."\n Comida típica:".$this->comida."\n Lazer(lago ou paia):".$this->lazer;
+}
+
+public function nadar() {
+return "\n Nadar(lago ou praia):".$this->lazer;
+}
+
 
 }
+
+$turista1 = new Turistas("Brasil","Brigadeiro","Praia");
+echo $turista1->comidadastípicas();
+echo $turista1->nadar();
 
 ?>
