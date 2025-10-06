@@ -2,6 +2,8 @@
 //Classes:Usuários
 //Métodos:emprestimoslivro()
 //objetos:$Usuario1,$Usuario2
+//A classe Usuaios se relaciona com usuario,livro,qtd
+
 
 class Usuaios {
 private $usuaios;

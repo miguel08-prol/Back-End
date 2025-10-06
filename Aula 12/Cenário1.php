@@ -3,6 +3,8 @@
 //Classes:Turistas
 //Métodos:comidadastípicas(),nadar().
 //objetos:$turista1,$turista2,$turista3
+//A classe Turistas se relaciona com local,lazer
+
 
 class Turistas{
 private $local;

@@ -2,6 +2,7 @@
 //Classes:Personagem
 //Métodos:Chover(),Amar(),Superar(),Comer()
 //objetos:$grupo1,$grupo2
+//A classe Personagem se relaciona com nome
 
 class Personagem {
 private $nome;

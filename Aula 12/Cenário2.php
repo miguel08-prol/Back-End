@@ -2,7 +2,7 @@
 //Classes:Personagem
 //Subclasse:Lugar(Métodos: fazertreinamento(),doacao()).
 //objetos:$grupo1,$grupo2
-
+//A classe Personagem se relaciona com a classe Lugar
 
 
 class Personagem {

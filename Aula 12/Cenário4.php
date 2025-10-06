@@ -2,6 +2,7 @@
 //Classes:Pessoas
 //Métodos:engravidar(),nascer(),crescer(),fazerEscolha(),doar()
 //objetos:$pessoa1,$pessoa2
+//A classe Pessoas se relaciona com nome
 
 class Pessoas {
 private $nome;

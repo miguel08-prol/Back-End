@@ -2,6 +2,7 @@
 //Classes:Clientes
 //Métodos:Compraringresso()
 //objetos:$Cliente1,$Cliente2
+//A classe Clientes se relaciona com clientes,filme,qtdingresso,sessao
 
 class Clientes {
 private $clientes;
