@@ -13,7 +13,7 @@ $dao->criarAluno( new Aluno(3,"Celso","PHP"));
 
 //Read
 echo "Listagem Inicial:\n";
-foreach ($id->lerAlunos() as $aluno) {echo "{$aluno->getId()} -{$aluno->getNome()} - {$aluno->getCurso()}\n";}
+foreach ($dao->lerAluno() as $aluno) {echo "{$this->aluno->getId()} - {$this->aluno->getNome()} - {$this->aluno->getCurso()} \n";}
 
 //Upgrade
 $dao->atualizarAluno(1,"Eduardo","C#");
