@@ -1,0 +1,43 @@
+<?php 
+//crud = create, read, update, delete
+//DAO = data access object
+//array. $frutas=['banana', 'maçã', 'laranja']; $frutas[0]
+
+class Aluno {
+private $id;
+private $nome;
+private $curso;
+public function __construct($id,$nome,$curso) {
+$this->id = $id;
+$this->nome = $nome;
+$this->curso = $curso;
+}
+
+public function setId($id) {
+$this->id =$id;
+}
+
+public function getId() {
+return $this->id;
+}
+
+public function setNome($nome) {
+$this->nome =$nome;
+}
+
+public function getNome() {
+return $this->nome;
+}
+
+public function setCurso($curso) {
+$this->curso =$curso;
+}
+
+public function getCurso() {
+return $this->curso;
+}
+}
+
+
+
+?>
