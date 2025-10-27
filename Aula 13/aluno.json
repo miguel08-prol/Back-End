@@ -1,0 +1,47 @@
+{
+    "1": {
+        "id": 1,
+        "nome": "Brun\u00e3o",
+        "curso": "JavaScript"
+    },
+    "2": {
+        "id": 2,
+        "nome": "Samuel",
+        "curso": "Java"
+    },
+    "3": {
+        "id": 3,
+        "nome": "Celso",
+        "curso": "PHP"
+    },
+    "4": {
+        "id": 4,
+        "nome": "Gabriel",
+        "curso": "Full stack"
+    },
+    "5": {
+        "id": 5,
+        "nome": "Maria Eduarda",
+        "curso": "Youtuber"
+    },
+    "6": {
+        "id": 6,
+        "nome": "Fillipo",
+        "curso": "Mecanico"
+    },
+    "7": {
+        "id": 7,
+        "nome": "Mateus",
+        "curso": "Stremer"
+    },
+    "8": {
+        "id": 8,
+        "nome": "Mariana",
+        "curso": "Eletrica"
+    },
+    "9": {
+        "id": 9,
+        "nome": "Luiza",
+        "curso": "Solda"
+    }
+}
