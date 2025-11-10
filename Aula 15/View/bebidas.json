@@ -1,72 +1,65 @@
 {
-    "Coca-Cola Lata": {
-        "nome": "Coca-Cola Lata",
-        "categoria": "Refrigerante",
-        "volume": "350ml",
-        "valor": "5.50",
-        "qtde": "120"
-    },
     "Heineken Long Neck": {
         "nome": "Heineken Long Neck",
         "categoria": "Cerveja",
         "volume": "330ml",
-        "valor": "7.00",
-        "qtde": "85"
+        "valor": 7,
+        "qtde": 85
     },
-    "\u00c1gua Mineral sem G\u00e1s": {
-        "nome": "\u00c1gua Mineral sem G\u00e1s",
-        "categoria": "\u00c1gua",
+    "Água Mineral sem Gás": {
+        "nome": "Água Mineral sem Gás",
+        "categoria": "Água",
         "volume": "500ml",
-        "valor": "3.00",
-        "qtde": "250"
+        "valor": 3,
+        "qtde": 250
     },
     "Suco de Laranja Integral": {
         "nome": "Suco de Laranja Integral",
         "categoria": "Suco",
         "volume": "1L",
-        "valor": "12.00",
-        "qtde": "40"
+        "valor": 12,
+        "qtde": 40
     },
     "Red Bull Energy Drink": {
         "nome": "Red Bull Energy Drink",
-        "categoria": "Energ\u00e9tico",
+        "categoria": "Energético",
         "volume": "250ml",
-        "valor": "10.50",
-        "qtde": "75"
+        "valor": 10.5,
+        "qtde": 75
     },
     "Vinho Tinto (Cabernet)": {
         "nome": "Vinho Tinto (Cabernet)",
         "categoria": "Vinho",
         "volume": "750ml",
-        "valor": "65.00",
-        "qtde": "30"
+        "valor": 65,
+        "qtde": 30
     },
-    "Vodka Absolut": {
-        "nome": "Vodka Absolut",
-        "categoria": "Destilado",
-        "volume": "750ml",
-        "valor": "95.90",
-        "qtde": "25"
-    },
-    "Guaran\u00e1 Antarctica": {
-        "nome": "Guaran\u00e1 Antarctica",
+    "Guaraná Antarctica": {
+        "nome": "Guaraná Antarctica",
         "categoria": "Refrigerante",
         "volume": "2L",
-        "valor": "10.00",
-        "qtde": "60"
+        "valor": 10,
+        "qtde": 60
     },
     "Cerveja Budweiser": {
         "nome": "Cerveja Budweiser",
         "categoria": "Cerveja",
         "volume": "330ml",
-        "valor": "5.00",
-        "qtde": "90"
+        "valor": 5,
+        "qtde": 90
     },
-    "\u00c1gua T\u00f4nica": {
-        "nome": "\u00c1gua T\u00f4nica",
+    "Água Tônica": {
+        "nome": "Água Tônica",
         "categoria": "Refrigerante",
         "volume": "350ml",
-        "valor": "4.50",
-        "qtde": "55"
+        "valor": 4.5,
+        "qtde": 55
+    },
+    "Monster": {
+        "nome": "Monster",
+        "categoria": "Energético",
+        "volume": "450ml",
+        "valor": 45,
+        "qtde": 45
     }
 }

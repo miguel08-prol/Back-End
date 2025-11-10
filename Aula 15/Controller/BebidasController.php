@@ -5,34 +5,39 @@ require_once __DIR__ . '/../Model/Bebida.php';
 class BebidaController {
     private $dao;
 
-    // Construtor: cria o objeto DAO (responsável por salvar/carregar)
     public function __construct() {
         $this->dao = new BebidaDAO();
     }
 
-    // Lista todas as bebidas
     public function ler() {
         return $this->dao->lerBebidas();
     }
 
-    // Cadastra nova bebida
     public function criar($nome, $categoria, $volume, $valor, $qtde) {
-
-        // // Gera ID automaticamente com base no timestamp (exemplo simples)
-        // $id = time(); // Função caso o objeto tenha um atributo de ID
-
-        $bebida = new Bebida( $nome, $categoria, $volume, $valor, $qtde);
+        // Converte para os tipos corretos
+        $valor = floatval($valor);
+        $qtde = intval($qtde);
+        
+        $bebida = new Bebida($nome, $categoria, $volume, $valor, $qtde);
         $this->dao->criarBebida($bebida);
     }
 
-    // Atualiza bebida existente
-    public function atualizar( $nome, $valor, $qtde) {
-        $this->dao->atualizarBebida( $nome, $valor, $qtde);
+    // Método atualizado para editar
+    public function atualizar($nomeAntigo, $nome, $categoria, $volume, $valor, $qtde) {
+        // Converte para os tipos corretos
+        $valor = floatval($valor);
+        $qtde = intval($qtde);
+        
+        return $this->dao->atualizarBebida($nomeAntigo, $nome, $categoria, $volume, $valor, $qtde);
     }
 
-    // Exclui bebida
+    // Buscar bebida por nome
+    public function buscar($nome) {
+        return $this->dao->buscarBebida($nome);
+    }
+
     public function deletar($nome) {
-        $this->dao->excluirBebida($nome);
+        return $this->dao->excluirBebida($nome);
     }
 }
 ?>
