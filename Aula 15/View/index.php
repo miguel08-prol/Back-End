@@ -1,11 +1,9 @@
 <?php
-// IMPORTANTE: Corrigi o nome do arquivo aqui (era BebidaController.php, o correto é BebidasController.php)
 require_once __DIR__ . '/../Controller/BebidasController.php';
 
-// IMPORTANTE: Corrigi o nome da classe aqui
 $controller = new BebidaController();
 
-// Ações da página
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Ação de salvar (o 'criar' no form antigo)
     if ($_POST['acao'] === 'salvar') {
@@ -31,7 +29,6 @@ $lista = $controller->ler();
     <link rel="icon" href="icon/cerveja.png">
 
     <style>
-        /* --- Configurações Globais e Background --- */
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
         * {
@@ -66,7 +63,6 @@ $lista = $controller->ler();
             padding-bottom: 0.5rem;
         }
 
-        /* --- Container "Glassmorphism" (Efeito Vidro) --- */
         .container {
             width: 100%;
             max-width: 900px;
@@ -79,7 +75,6 @@ $lista = $controller->ler();
             border: 1px solid rgba(255, 255, 255, 0.18);
             padding: 2rem;
             
-            /* Animação de entrada */
             opacity: 0;
             transform: translateY(20px);
             animation: fadeIn 0.5s ease-out forwards;
@@ -92,7 +87,6 @@ $lista = $controller->ler();
             }
         }
 
-        /* --- Estilo do Formulário --- */
         form {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
