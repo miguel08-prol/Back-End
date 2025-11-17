@@ -8,7 +8,6 @@ class BebidaDAO {
     public function __construct() {
         $this->conn = Connection::getInstance();
 
-        // Cria a tabela se não existir
         $this->conn->exec("
             CREATE TABLE IF NOT EXISTS bebidas (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -20,9 +19,7 @@ class BebidaDAO {
             )
         ");
     }
-    
 
-    // CREATE
     public function criarBebida(Bebida $bebida) {
         $stmt = $this->conn->prepare("
             INSERT INTO bebidas (nome, categoria, volume, valor, qtde)
@@ -37,9 +34,8 @@ class BebidaDAO {
         ]);
     }
 
-    // READ
     public function lerBebidas() {
-        $stmt = $this->conn->query("SELECT * FROM bebidas ORDER BY nome");
+        $stmt = $this->conn->query("SELECT * FROM bebidas");
         $result = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $result[] = new Bebida(
@@ -53,7 +49,6 @@ class BebidaDAO {
         return $result;
     }
 
-    // UPDATE
     public function atualizarBebida($nomeOriginal, $novoNome, $categoria, $volume, $valor, $qtde) {
         $stmt = $this->conn->prepare("
             UPDATE bebidas
@@ -70,17 +65,16 @@ class BebidaDAO {
         ]);
     }
 
-    // DELETE
     public function excluirBebida($nome) {
         $stmt = $this->conn->prepare("DELETE FROM bebidas WHERE nome = :nome");
         $stmt->execute([':nome' => $nome]);
     }
 
-    // BUSCAR POR NOME
     public function buscarPorNome($nome) {
         $stmt = $this->conn->prepare("SELECT * FROM bebidas WHERE nome = :nome LIMIT 1");
         $stmt->execute([':nome' => $nome]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        
         if ($row) {
             return new Bebida(
                 $row['nome'],
@@ -93,4 +87,3 @@ class BebidaDAO {
         return null;
     }
 }
-?>
