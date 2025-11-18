@@ -10,7 +10,7 @@ class Connection {
                 $host = 'localhost';
                 $dbname = 'projeto_bebidas2';
                 $user = 'root';
-                $pass = '1234';
+                $pass = 'senaisp';
 
                 // Conecta ao MySQL
                 self::$instance = new PDO(
