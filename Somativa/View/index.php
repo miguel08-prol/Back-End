@@ -1,19 +1,19 @@
 <?php
 session_start(); 
-require_once __DIR__ . '/../Controller/BibliotecaController.php';
+require_once __DIR__ . '/../Controller/LivroController.php';
 
-$controller = new BebidaController();
+$controller = new LivroController();
 
 $modoEdicao = false;
-$bebidaEditando = null;
+$livroEditando = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (isset($_POST['acao']) && $_POST['acao'] === 'deletar') {
         try {
-            $nomeExcluido = $_POST['nome'];
-            $controller->deletar($nomeExcluido);
-            $_SESSION['message'] = ['type' => 'success', 'text' => 'Bebida "'.htmlspecialchars($nomeExcluido).'" excluída com sucesso!'];
+            $nomeExcluido = $_POST['titulo'];
+            $controller->excluirLivro($tituloExcluido);
+            $_SESSION['message'] = ['type' => 'success', 'text' => 'Livro "'.htmlspecialchars($tituloExcluido).'" excluída com sucesso!'];
         } catch (PDOException $e) {
             $_SESSION['message'] = ['type' => 'error', 'text' => 'Erro ao excluir: ' . $e->getMessage()];
         }
@@ -23,47 +23,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } 
     
     elseif (isset($_POST['acao']) && $_POST['acao'] === 'editar') {
-        $bebidaEditando = $controller->buscarPorNome($_POST['nome']);
-        if ($bebidaEditando) {
+        $bebidaEditando = $controller->buscarPorTitulo($_POST['titulo']);
+        if ($livroEditando) {
             $modoEdicao = true;
         }
     } 
     
     elseif (isset($_POST['acao']) && $_POST['acao'] === 'salvar') {
         
-        $nome = $_POST['nome'];
-        $nomeAntigo = $_POST['nome_antigo'] ?? '';
+        $titulo = $_POST['titulo'];
+        $tituloAntigo = $_POST['titulo_antigo'] ?? '';
         
         try {
-            // Tenta Salvar ou Atualizar
-            if (!empty($nomeAntigo)) {
-                $controller->atualizar(
-                    $nomeAntigo, 
-                    $nome, 
-                    $_POST['categoria'], 
-                    $_POST['volume'], 
-                    $_POST['valor'], 
-                    $_POST['qtde']
+            if (!empty($tituloAntigo)) {
+                $controller->atualizarLivro(
+                    $tituloAntigo, 
+                    $titulo, 
+                    $_POST['autor'], 
+                    $_POST['ano_publicacao'], 
+                    $_POST['genero_literario'], 
+                    $_POST['quantidade_disponivel']
                 );
-                $mensagem = 'Bebida "'.$nome.'" atualizada com sucesso!';
+                $mensagem = 'Livro "'.$titulo.'" atualizada com sucesso!';
             } else {
                 $controller->criar(
-                    $nome, 
-                    $_POST['categoria'], 
-                    $_POST['volume'], 
-                    $_POST['valor'], 
-                    $_POST['qtde']
+                    $titulo, 
+                    $_POST['autor'], 
+                    $_POST['ano_publicacao'], 
+                    $_POST['genero_literario'], 
+                    $_POST['quantidade_disponivel']
                 );
-                $mensagem = 'Bebida "'.$nome.'" cadastrada com sucesso!';
+                $mensagem = 'Livro "'.$titulo.'" cadastrada com sucesso!';
             }
-            
-            // Se deu certo:
-            $_SESSION['message'] = ['type' => 'success', 'text' => $mensagem];
+                        $_SESSION['message'] = ['type' => 'success', 'text' => $mensagem];
 
         } catch (PDOException $e) {
-            // Se deu erro (ex: Nome duplicado código 23000)
             if ($e->getCode() == '23000') {
-                $_SESSION['message'] = ['type' => 'error', 'text' => 'Erro: Já existe uma bebida cadastrada com o nome "'.$nome.'"!'];
+                $_SESSION['message'] = ['type' => 'error', 'text' => 'Erro: Já existe uma bebida cadastrada com o nome "'.$titulo.'"!'];
             } else {
                 $_SESSION['message'] = ['type' => 'error', 'text' => 'Erro no banco de dados: ' . $e->getMessage()];
             }
@@ -73,17 +69,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 }
-
-// Lógica de Pesquisa
 $searchTerm = '';
 if (isset($_GET['q']) && !empty(trim($_GET['q']))) {
     $searchTerm = trim($_GET['q']);
-    $bebidas = $controller->buscarParcial($searchTerm); 
+    $livro = $controller->buscarPorTituloParcial($searchTerm); 
 } else {
-    $bebidas = $controller->ler();
+    $livro = $controller->ler();
 }
 
-// Variáveis para o Modal
 $showModalStatus = false;
 $modalType = '';
 $modalText = '';
