@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/../Model/BebidaDAO.php';
-require_once __DIR__ . '/../Model/Bebida.php';
+require_once __DIR__ . '/../Model/BibliotecaDAO.php';
+require_once __DIR__ . '/../Model/Biblioteca.php';
 
 class BebidaController {
     private $dao;
