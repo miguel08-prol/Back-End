@@ -1,4 +1,5 @@
 <?php
+session_start(); 
 require_once __DIR__ . '/../Controller/BebidasController.php';
 
 $controller = new BebidaController();
@@ -9,7 +10,14 @@ $bebidaEditando = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (isset($_POST['acao']) && $_POST['acao'] === 'deletar') {
-        $controller->deletar($_POST['nome']);
+        try {
+            $nomeExcluido = $_POST['nome'];
+            $controller->deletar($nomeExcluido);
+            $_SESSION['message'] = ['type' => 'success', 'text' => 'Bebida "'.htmlspecialchars($nomeExcluido).'" excluída com sucesso!'];
+        } catch (PDOException $e) {
+            $_SESSION['message'] = ['type' => 'error', 'text' => 'Erro ao excluir: ' . $e->getMessage()];
+        }
+        
         header("Location: " . $_SERVER['PHP_SELF']);
         exit;
     } 
@@ -23,30 +31,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     elseif (isset($_POST['acao']) && $_POST['acao'] === 'salvar') {
         
-        if (isset($_POST['nome_antigo']) && !empty($_POST['nome_antigo'])) {
-            $controller->atualizar(
-                $_POST['nome_antigo'], 
-                $_POST['nome'], 
-                $_POST['categoria'], 
-                $_POST['volume'], 
-                $_POST['valor'], 
-                $_POST['qtde']
-            );
-        } else {
-            $controller->criar(
-                $_POST['nome'], 
-                $_POST['categoria'], 
-                $_POST['volume'], 
-                $_POST['valor'], 
-                $_POST['qtde']
-            );
+        $nome = $_POST['nome'];
+        $nomeAntigo = $_POST['nome_antigo'] ?? '';
+        
+        try {
+            // Tenta Salvar ou Atualizar
+            if (!empty($nomeAntigo)) {
+                $controller->atualizar(
+                    $nomeAntigo, 
+                    $nome, 
+                    $_POST['categoria'], 
+                    $_POST['volume'], 
+                    $_POST['valor'], 
+                    $_POST['qtde']
+                );
+                $mensagem = 'Bebida "'.$nome.'" atualizada com sucesso!';
+            } else {
+                $controller->criar(
+                    $nome, 
+                    $_POST['categoria'], 
+                    $_POST['volume'], 
+                    $_POST['valor'], 
+                    $_POST['qtde']
+                );
+                $mensagem = 'Bebida "'.$nome.'" cadastrada com sucesso!';
+            }
+            
+            // Se deu certo:
+            $_SESSION['message'] = ['type' => 'success', 'text' => $mensagem];
+
+        } catch (PDOException $e) {
+            // Se deu erro (ex: Nome duplicado código 23000)
+            if ($e->getCode() == '23000') {
+                $_SESSION['message'] = ['type' => 'error', 'text' => 'Erro: Já existe uma bebida cadastrada com o nome "'.$nome.'"!'];
+            } else {
+                $_SESSION['message'] = ['type' => 'error', 'text' => 'Erro no banco de dados: ' . $e->getMessage()];
+            }
         }
+        
         header("Location: " . $_SERVER['PHP_SELF']);
         exit;
     }
 }
 
-$bebidas = $controller->ler();
+// Lógica de Pesquisa
+$searchTerm = '';
+if (isset($_GET['q']) && !empty(trim($_GET['q']))) {
+    $searchTerm = trim($_GET['q']);
+    $bebidas = $controller->buscarParcial($searchTerm); 
+} else {
+    $bebidas = $controller->ler();
+}
+
+// Variáveis para o Modal
+$showModalStatus = false;
+$modalType = '';
+$modalText = '';
+
+if (isset($_SESSION['message'])) {
+    $showModalStatus = true;
+    $modalType = $_SESSION['message']['type'];
+    $modalText = $_SESSION['message']['text'];
+    unset($_SESSION['message']); 
+}
 ?>
 
 <!DOCTYPE html>
@@ -56,302 +103,242 @@ $bebidas = $controller->ler();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão de Bebidas</title>
     <link rel="icon" href="icon/cerveja.png">
+    <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     
-    <style>
-        :root {
-            --primary: #FF6B35;
-            --secondary: #004E89;
-            --accent: #F7B801;
-            --dark: #1A1A2E;
-            --light: #FFFFFF;
-            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--dark);
-            color: var(--light);
-            padding-bottom: 3rem;
-        }
-
-        header {
-            background: rgba(26, 26, 46, 0.95);
-            padding: 1rem 5%;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        }
-        
-        .logo { 
-            font-family: 'Montserrat', sans-serif; 
-            font-weight: 900; 
-            font-size: 1.8rem; 
-            background: var(--gradient-2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        h1 { 
-            text-align: center; 
-            margin-bottom: 1.5rem; 
-            font-weight: 800; 
-            font-size: 2rem;
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 3rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-        }
-        
-        .form-full { grid-column: 1 / -1; }
-
-        .form-group { margin-bottom: 1rem; }
-        
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: rgba(255,255,255,0.8);
-        }
-
-        input, select {
-            width: 100%;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            color: var(--light);
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            font-family: 'Inter', sans-serif;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        select option {
-            background: var(--dark);
-            color: var(--light);
-        }
-
-        .btn {
-            padding: 1rem 2rem;
-            border: none;
-            border-radius: 50px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: transform 0.2s;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-            font-size: 1rem;
-        }
-        .btn:hover { transform: translateY(-3px); }
-        
-        .btn-primary {
-            background: var(--gradient-2);
-            color: white;
-            width: 100%;
-            margin-top: 1rem;
-        }
-
-        .btn-cancel {
-            background: transparent;
-            border: 2px solid rgba(255,255,255,0.2);
-            color: rgba(255,255,255,0.7);
-            margin-top: 1rem;
-            width: 100%;
-        }
-        .btn-cancel:hover { border-color: var(--primary); color: white; }
-
-        .table-responsive { overflow-x: auto; }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 15px;
-            overflow: hidden;
-        }
-
-        th, td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        th {
-            background: rgba(255, 255, 255, 0.1);
-            font-weight: 800;
-            color: var(--primary);
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 1px;
-        }
-
-        tr:hover { background: rgba(255,255,255,0.05); }
-
-        .actions { display: flex; gap: 0.5rem; }
-        
-        .btn-small {
-            padding: 0.5rem 1rem;
-            border-radius: 10px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        .btn-small:hover { opacity: 0.8; }
-        
-        .btn-edit { background: var(--accent); color: var(--dark); }
-        .btn-delete { background: #ff4757; color: white; }
-
-        @media(max-width: 768px) {
-            .form-grid { grid-template-columns: 1fr; }
-        }
-    </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo">GESTÃO DE BEBIDAS</div>
-    </header>
-
-    <div class="container">
-        <h1><?php echo $modoEdicao ? 'Editar Bebida' : 'Nova Bebida'; ?></h1>
-
-        <div class="card">
-            <form method="POST">
-                <input type="hidden" name="acao" value="salvar">
-                
-                <?php if ($modoEdicao): ?>
-                    <input type="hidden" name="nome_antigo" value="<?php echo htmlspecialchars($bebidaEditando->getNome()); ?>">
-                <?php endif; ?>
-
-                <div class="form-grid">
-                    <div class="form-group form-full">
-                        <label>Nome:</label>
-                        <input type="text" name="nome" placeholder="Ex: Coca Cola" required 
-                               value="<?php echo $modoEdicao ? htmlspecialchars($bebidaEditando->getNome()) : ''; ?>">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Categoria:</label>
-                        <select name="categoria" required>
-                            <option value="">Selecione...</option>
-                            <option value="Refrigerante" <?php if($modoEdicao && $bebidaEditando->getCategoria() == 'Refrigerante') echo 'selected'; ?>>Refrigerante</option>
-                            <option value="Suco" <?php if($modoEdicao && $bebidaEditando->getCategoria() == 'Suco') echo 'selected'; ?>>Suco</option>
-                            <option value="Alcoólica" <?php if($modoEdicao && $bebidaEditando->getCategoria() == 'Alcoólica') echo 'selected'; ?>>Alcoólica</option>
-                            <option value="Água" <?php if($modoEdicao && $bebidaEditando->getCategoria() == 'Água') echo 'selected'; ?>>Água</option>
-                            <option value="Energético" <?php if($modoEdicao && $bebidaEditando->getCategoria() == 'Energético') echo 'selected'; ?>>Energético</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Volume:</label>
-                        <input type="text" name="volume" placeholder="Ex: 350ml" required 
-                               value="<?php echo $modoEdicao ? htmlspecialchars($bebidaEditando->getVolume()) : ''; ?>">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Valor (R$):</label>
-                        <input type="number" step="0.01" name="valor" placeholder="0.00" required 
-                               value="<?php echo $modoEdicao ? htmlspecialchars($bebidaEditando->getValor()) : ''; ?>">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Quantidade:</label>
-                        <input type="number" name="qtde" placeholder="0" required 
-                               value="<?php echo $modoEdicao ? htmlspecialchars($bebidaEditando->getQtde()) : ''; ?>">
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary">
-                    <?php echo $modoEdicao ? 'SALVAR ALTERAÇÕES' : 'CADASTRAR'; ?>
-                </button>
-                
-                <?php if ($modoEdicao): ?>
-                    <a href="index.php" class="btn btn-cancel">CANCELAR</a>
-                <?php endif; ?>
-            </form>
+    <div id="statusModal" class="modal-overlay">
+        <div class="modal-content"> <div class="modal-icon"></div> <p id="modalStatusMessage" class="modal-message"></p>
+            <button class="btn btn-primary" onclick="document.getElementById('statusModal').classList.remove('show');">FECHAR</button>
         </div>
-
-        <h1>Estoque Atual</h1>
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Categoria</th>
-                        <th>Volume</th>
-                        <th>Valor</th>
-                        <th>Qtde</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (!empty($bebidas)): ?>
-                        <?php foreach ($bebidas as $bebida): ?>
-                            <tr>
-                                <td style="font-weight: 600;"><?php echo htmlspecialchars($bebida->getNome()); ?></td>
-                                <td><?php echo htmlspecialchars($bebida->getCategoria()); ?></td>
-                                <td><?php echo htmlspecialchars($bebida->getVolume()); ?></td>
-                                <td style="color: var(--primary); font-weight: bold;">R$ <?php echo number_format($bebida->getValor(), 2, ',', '.'); ?></td>
-                                <td><?php echo htmlspecialchars($bebida->getQtde()); ?></td>
-                                <td>
-                                    <div class="actions">
-                                        <form method="POST" style="margin:0;">
-                                            <input type="hidden" name="acao" value="editar">
-                                            <input type="hidden" name="nome" value="<?php echo htmlspecialchars($bebida->getNome()); ?>">
-                                            <button type="submit" class="btn-small btn-edit">Editar</button>
-                                        </form>
-                                        
-                                        <form method="POST" style="margin:0;">
-                                            <input type="hidden" name="acao" value="deletar">
-                                            <input type="hidden" name="nome" value="<?php echo htmlspecialchars($bebida->getNome()); ?>">
-                                            <button type="submit" class="btn-small btn-delete" onclick="return confirm('Tem certeza que deseja excluir?');">Excluir</button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: 3rem; color: rgba(255,255,255,0.5);">
-                                Nenhuma bebida encontrada.
-                            </td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+    </div>
+    
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-content modal-confirmation">
+            <div class="modal-icon">⚠️</div> 
+            <p id="modalConfirmMessage" class="modal-message">Tem certeza que deseja excluir a bebida?</p>
+            
+            <div class="modal-buttons">
+                <form id="deleteForm" method="POST" style="display: contents;">
+                    <input type="hidden" name="acao" value="deletar">
+                    <input type="hidden" name="nome" id="bebidaParaExcluir">
+                    <button type="submit" class="btn btn-confirm">EXCLUIR</button>
+                </form>
+                <button type="button" class="btn btn-dismiss" onclick="document.getElementById('confirmModal').classList.remove('show');">CANCELAR</button>
+            </div>
         </div>
     </div>
 
+<header>
+    <div class="logo-container">
+        <img src="icon/logo.png" alt="Logo" class="logo-img">
+        <span class="logo-text">GESTÃO DE BEBIDAS</span>
+    </div>
+</header>
+
+    <div class="container">
+        
+        <div class="tabs-buttons">
+            <button class="btn-tab" data-tab="form-section">Cadastro/Edição</button>
+            <button class="btn-tab" data-tab="stock-section">Estoque Atual (<?php echo count($bebidas); ?>)</button>
+        </div>
+
+        <div id="form-section" class="tab-content hidden">
+            <h1><?php echo $modoEdicao ? 'Editar Bebida' : 'Nova Bebida'; ?></h1>
+
+            <div class="card">
+                <form method="POST">
+                    <input type="hidden" name="acao" value="salvar">
+                    
+                    <?php if ($modoEdicao): ?>
+                        <input type="hidden" name="nome_antigo" value="<?php echo htmlspecialchars($bebidaEditando->getNome()); ?>">
+                    <?php endif; ?>
+
+                    <div class="form-grid">
+                        <div class="form-group form-full">
+                            <label>Nome:</label>
+                            <input type="text" name="nome" placeholder="Ex: Coca Cola" required 
+                                   value="<?php echo $modoEdicao ? htmlspecialchars($bebidaEditando->getNome()) : ''; ?>">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Categoria:</label>
+                            <select name="categoria" required>
+                                <option value="">Selecione...</option>
+                                <option value="Refrigerante" <?php if($modoEdicao && $bebidaEditando->getCategoria() == 'Refrigerante') echo 'selected'; ?>>Refrigerante</option>
+                                <option value="Suco" <?php if($modoEdicao && $bebidaEditando->getCategoria() == 'Suco') echo 'selected'; ?>>Suco</option>
+                                <option value="Alcoólica" <?php if($modoEdicao && $bebidaEditando->getCategoria() == 'Alcoólica') echo 'selected'; ?>>Alcoólica</option>
+                                <option value="Água" <?php if($modoEdicao && $bebidaEditando->getCategoria() == 'Água') echo 'selected'; ?>>Água</option>
+                                <option value="Energético" <?php if($modoEdicao && $bebidaEditando->getCategoria() == 'Energético') echo 'selected'; ?>>Energético</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Volume:</label>
+                            <input type="text" name="volume" placeholder="Ex: 350ml" required 
+                                   value="<?php echo $modoEdicao ? htmlspecialchars($bebidaEditando->getVolume()) : ''; ?>">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Valor (R$):</label>
+                            <input type="number" step="0.01" name="valor" placeholder="0.00" required 
+                                   value="<?php echo $modoEdicao ? htmlspecialchars($bebidaEditando->getValor()) : ''; ?>">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Quantidade:</label>
+                            <input type="number" name="qtde" placeholder="0" required 
+                                   value="<?php echo $modoEdicao ? htmlspecialchars($bebidaEditando->getQtde()) : ''; ?>">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <?php echo $modoEdicao ? 'SALVAR ALTERAÇÕES' : 'CADASTRAR'; ?>
+                    </button>
+                    
+                    <?php if ($modoEdicao): ?>
+                        <a href="index.php" class="btn btn-cancel">CANCELAR</a>
+                    <?php endif; ?>
+                </form>
+            </div>
+        </div>
+
+
+        <div id="stock-section" class="tab-content hidden">
+            <h1>Estoque Atual (<?php echo empty($searchTerm) ? count($bebidas) : count($bebidas) . ' encontrados'; ?>)</h1>
+            
+            <form method="GET" class="search-form">
+                <input type="text" name="q" placeholder="Pesquisar por nome ou categoria..." 
+                       value="<?php echo htmlspecialchars($searchTerm); ?>">
+                <button type="submit" class="btn btn-search">🔍 Buscar</button> 
+                <?php if (!empty($searchTerm)): ?>
+                    <a href="index.php" class="btn btn-clear-search">Limpar Busca</a>
+                <?php endif; ?>
+            </form>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Categoria</th>
+                            <th>Volume</th>
+                            <th>Valor</th>
+                            <th>Qtde</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (!empty($bebidas)): ?>
+                            <?php foreach ($bebidas as $bebida): ?>
+                                <tr>
+                                    <td style="font-weight: 600;"><?php echo htmlspecialchars($bebida->getNome()); ?></td>
+                                    <td><?php echo htmlspecialchars($bebida->getCategoria()); ?></td>
+                                    <td><?php echo htmlspecialchars($bebida->getVolume()); ?></td>
+                                    <td style="color: var(--primary); font-weight: bold;">R$ <?php echo number_format($bebida->getValor(), 2, ',', '.'); ?></td>
+                                    <td><?php echo htmlspecialchars($bebida->getQtde()); ?></td>
+                                    <td>
+                                        <div class="actions">
+                                            <form method="POST" style="margin:0;">
+                                                <input type="hidden" name="acao" value="editar">
+                                                <input type="hidden" name="nome" value="<?php echo htmlspecialchars($bebida->getNome()); ?>">
+                                                <button type="submit" class="btn-small btn-edit">Editar</button>
+                                            </form>
+                                            
+                                            <button type="button" class="btn-small btn-delete" 
+                                                    data-nome-bebida="<?php echo htmlspecialchars($bebida->getNome()); ?>"
+                                                    onclick="openConfirmModal(this.getAttribute('data-nome-bebida'))">Excluir</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 3rem; color: rgba(255,255,255,0.5);">
+                                    <?php echo empty($searchTerm) ? 'Nenhuma bebida encontrada.' : 'Nenhuma bebida corresponde à pesquisa.'; ?>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function openConfirmModal(bebidaNome) {
+            document.getElementById('bebidaParaExcluir').value = bebidaNome;
+            document.getElementById('modalConfirmMessage').innerHTML = `Tem certeza que deseja excluir a bebida <b>${bebidaNome}</b>?`;
+            document.getElementById('confirmModal').classList.add('show');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.btn-tab');
+            const contents = document.querySelectorAll('.tab-content');
+
+            function switchTab(targetId) {
+                tabs.forEach(t => t.classList.remove('active'));
+                const targetButton = document.querySelector(`.btn-tab[data-tab="${targetId}"]`);
+                if (targetButton) targetButton.classList.add('active');
+
+                contents.forEach(content => {
+                    if (content.id === targetId) {
+                        content.classList.remove('hidden');
+                    } else {
+                        content.classList.add('hidden');
+                    }
+                });
+            }
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetId = tab.getAttribute('data-tab');
+                    switchTab(targetId);
+                });
+            });
+            
+            // --- MODAL STATUS LOGIC ---
+            const statusModal = document.getElementById('statusModal');
+            const modalStatusMessageElement = document.getElementById('modalStatusMessage');
+            const modalContent = document.querySelector('#statusModal .modal-content');
+            const modalIcon = document.querySelector('#statusModal .modal-icon');
+
+            const showModalStatus = <?php echo json_encode($showModalStatus); ?>;
+            const modalType = <?php echo json_encode($modalType); ?>; // 'success' ou 'error'
+            const modalText = <?php echo json_encode($modalText); ?>;
+            
+            const modoEdicao = <?php echo json_encode($modoEdicao); ?>;
+            const searchTerm = <?php echo json_encode($searchTerm); ?>;
+
+            let initialTabId = 'stock-section';
+            if (modoEdicao) {
+                initialTabId = 'form-section'; 
+            } else if (showModalStatus || searchTerm) {
+                 initialTabId = 'stock-section'; 
+            }
+
+            if (showModalStatus) {
+                 modalStatusMessageElement.textContent = modalText;
+                 
+                 // Remove classes antigas e aplica a correta
+                 modalContent.classList.remove('modal-type-success', 'modal-type-error');
+                 
+                 if (modalType === 'success') {
+                     modalContent.classList.add('modal-type-success');
+                     modalIcon.textContent = '✅';
+                 } else {
+                     modalContent.classList.add('modal-type-error');
+                     modalIcon.textContent = '❌';
+                 }
+                 
+                 statusModal.classList.add('show');
+            }
+
+            switchTab(initialTabId);
+        });
+    </script>
 </body>
 </html>

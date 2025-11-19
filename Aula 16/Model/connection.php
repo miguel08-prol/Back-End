@@ -2,11 +2,10 @@
 class Connection {
     private static $instance = null;
 
-    
     public static function getInstance() {
         if (!self::$instance) {
             try {
-                // Ajuste seu usuário e senha aqui
+                // Ajuste seu usuário e senha aqui, se necessário
                 $host = 'localhost';
                 $dbname = 'projeto_bebidas2';
                 $user = 'root';
@@ -31,3 +30,4 @@ class Connection {
         return self::$instance;
     }
 } 
+?>

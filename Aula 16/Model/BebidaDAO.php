@@ -1,7 +1,6 @@
 <?php
-require_once 'Bebida.php';
-require_once 'connection.php';
-
+require_once __DIR__ . '/Bebida.php';
+require_once __DIR__ . '/connection.php';
 class BebidaDAO {
     private $conn;
 
@@ -86,4 +85,23 @@ class BebidaDAO {
         }
         return null;
     }
+    
+ 
+    public function buscarPorNomeParcial($nomeParcial) {
+        $stmt = $this->conn->prepare("SELECT * FROM bebidas WHERE nome LIKE :termo OR categoria LIKE :termo");
+        $searchTerm = '%' . $nomeParcial . '%';
+        $stmt->execute([':termo' => $searchTerm]);
+        $result = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = new Bebida(
+                $row['nome'],
+                $row['categoria'],
+                $row['volume'],
+                $row['valor'],
+                $row['qtde']
+            );
+        }
+        return $result;
+    }
 }
+?>
