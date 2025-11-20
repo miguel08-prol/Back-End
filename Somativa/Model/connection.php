@@ -5,7 +5,6 @@ class Connection {
     public static function getInstance() {
         if (!self::$instance) {
             try {
-                // Ajuste seu usuário e senha aqui, se necessário
                 $host = 'localhost';
                 $dbname = 'Biblioteca';
                 $user = 'root';
@@ -19,7 +18,6 @@ class Connection {
                 );
                 self::$instance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-                // Cria o banco de dados se não existir
                 self::$instance->exec("CREATE DATABASE IF NOT EXISTS $dbname CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
                 self::$instance->exec("USE $dbname");
 

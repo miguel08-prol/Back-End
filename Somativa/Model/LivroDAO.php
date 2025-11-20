@@ -18,18 +18,18 @@ class LivroDAO {
             )
         ");
     }
-
+    
     public function criarLivro(Livro $livro) {
         $stmt = $this->conn->prepare("
             INSERT INTO livro (titulo, autor, ano_publicacao, genero_literario, quantidade_disponivel)
             VALUES (:titulo, :autor, :ano_publicacao, :genero_literario, :quantidade_disponivel)
         ");
         $stmt->execute([
-            ':titulo' => $titulo->getTitulo(),
-            ':autor' => $autor->getAutor(),
-            ':ano_publicacao' => $ano_publicacao->getAno_publicacao(),
-            ':genero_literario' => $genero_literario->getGenero_literario(),
-            ':quantidade_disponivel' => $quantidade_disponivel->getQuantidade_disponivel()
+            ':titulo' => $livro->getTitulo(),
+            ':autor' => $livro->getAutor(),
+            ':ano_publicacao' => $livro->getAno_publicacao(),
+            ':genero_literario' => $livro->getGenero_literario(),
+            ':quantidade_disponivel' => $livro->getQuantidade_disponivel()
         ]);
     }
 
@@ -51,8 +51,12 @@ class LivroDAO {
     public function atualizarLivro($tituloOriginal, $novoTitulo, $autor, $ano_publicacao, $genero_literario, $quantidade_disponivel) {
         $stmt = $this->conn->prepare("
             UPDATE livro
-            SET nome = :novoTitulo, autor = :autor, autor = :autor, ano_publicacao = :ano_publicacao, genero_literario = :genero_literario, quantidade_disponivel = :quantidade_disponivel
-            WHERE nome = :tituloOriginal
+            SET titulo = :novoTitulo, 
+                autor = :autor, 
+                ano_publicacao = :ano_publicacao, 
+                genero_literario = :genero_literario, 
+                quantidade_disponivel = :quantidade_disponivel
+            WHERE titulo = :tituloOriginal
         ");
         $stmt->execute([
             ':novoTitulo' => $novoTitulo,
@@ -86,7 +90,6 @@ class LivroDAO {
         return null;
     }
     
- 
     public function buscarPorTituloParcial($tituloParcial) {
         $stmt = $this->conn->prepare("SELECT * FROM livro WHERE titulo LIKE :termo OR autor LIKE :termo");
         $searchTerm = '%' . $tituloParcial . '%';

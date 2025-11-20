@@ -11,9 +11,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (isset($_POST['acao']) && $_POST['acao'] === 'deletar') {
         try {
-            $nomeExcluido = $_POST['titulo'];
+            $tituloExcluido = $_POST['titulo']; 
             $controller->excluirLivro($tituloExcluido);
-            $_SESSION['message'] = ['type' => 'success', 'text' => 'Livro "'.htmlspecialchars($tituloExcluido).'" excluída com sucesso!'];
+            $_SESSION['message'] = ['type' => 'success', 'text' => 'Livro "'.htmlspecialchars($tituloExcluido).'" excluído com sucesso!'];
         } catch (PDOException $e) {
             $_SESSION['message'] = ['type' => 'error', 'text' => 'Erro ao excluir: ' . $e->getMessage()];
         }
@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } 
     
     elseif (isset($_POST['acao']) && $_POST['acao'] === 'editar') {
-        $bebidaEditando = $controller->buscarPorTitulo($_POST['titulo']);
+        $livroEditando = $controller->buscarPorTitulo($_POST['titulo']);
         if ($livroEditando) {
             $modoEdicao = true;
         }
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_POST['genero_literario'], 
                     $_POST['quantidade_disponivel']
                 );
-                $mensagem = 'Livro "'.$titulo.'" atualizada com sucesso!';
+                $mensagem = 'Livro "'.$titulo.'" atualizado com sucesso!';
             } else {
                 $controller->criar(
                     $titulo, 
@@ -53,13 +53,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_POST['genero_literario'], 
                     $_POST['quantidade_disponivel']
                 );
-                $mensagem = 'Livro "'.$titulo.'" cadastrada com sucesso!';
+                $mensagem = 'Livro "'.$titulo.'" cadastrado com sucesso!';
             }
-                        $_SESSION['message'] = ['type' => 'success', 'text' => $mensagem];
+            $_SESSION['message'] = ['type' => 'success', 'text' => $mensagem];
 
         } catch (PDOException $e) {
             if ($e->getCode() == '23000') {
-                $_SESSION['message'] = ['type' => 'error', 'text' => 'Erro: Já existe uma bebida cadastrada com o nome "'.$titulo.'"!'];
+                $_SESSION['message'] = ['type' => 'error', 'text' => 'Erro: Já existe um livro cadastrado com o título "'.$titulo.'"!'];
             } else {
                 $_SESSION['message'] = ['type' => 'error', 'text' => 'Erro no banco de dados: ' . $e->getMessage()];
             }
@@ -69,12 +69,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 }
+
 $searchTerm = '';
 if (isset($_GET['q']) && !empty(trim($_GET['q']))) {
     $searchTerm = trim($_GET['q']);
-    $livro = $controller->buscarPorTituloParcial($searchTerm); 
+    $livros = $controller->buscarPorTituloParcial($searchTerm); 
 } else {
-    $livro = $controller->ler();
+    $livros = $controller->ler();
 }
 
 $showModalStatus = false;
@@ -94,16 +95,17 @@ if (isset($_SESSION['message'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Bebidas</title>
-    <link rel="icon" href="icon/cerveja.png">
+    <title>Gestão de Biblioteca</title>
+    <link rel="icon" href="icon/biblioteca.png"> 
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    
 </head>
 <body>
 
     <div id="statusModal" class="modal-overlay">
-        <div class="modal-content"> <div class="modal-icon"></div> <p id="modalStatusMessage" class="modal-message"></p>
+        <div class="modal-content"> 
+            <div class="modal-icon"></div> 
+            <p id="modalStatusMessage" class="modal-message"></p>
             <button class="btn btn-primary" onclick="document.getElementById('statusModal').classList.remove('show');">FECHAR</button>
         </div>
     </div>
@@ -111,12 +113,12 @@ if (isset($_SESSION['message'])) {
     <div id="confirmModal" class="modal-overlay">
         <div class="modal-content modal-confirmation">
             <div class="modal-icon">⚠️</div> 
-            <p id="modalConfirmMessage" class="modal-message">Tem certeza que deseja excluir a bebida?</p>
+            <p id="modalConfirmMessage" class="modal-message">Tem certeza que deseja excluir o livro?</p>
             
             <div class="modal-buttons">
                 <form id="deleteForm" method="POST" style="display: contents;">
                     <input type="hidden" name="acao" value="deletar">
-                    <input type="hidden" name="nome" id="bebidaParaExcluir">
+                    <input type="hidden" name="titulo" id="livroParaExcluir"> 
                     <button type="submit" class="btn btn-confirm">EXCLUIR</button>
                 </form>
                 <button type="button" class="btn btn-dismiss" onclick="document.getElementById('confirmModal').classList.remove('show');">CANCELAR</button>
@@ -124,86 +126,79 @@ if (isset($_SESSION['message'])) {
         </div>
     </div>
 
-<header>
-    <div class="logo-container">
-        <img src="icon/logo.png" alt="Logo" class="logo-img">
-        <span class="logo-text">GESTÃO DE BEBIDAS</span>
-    </div>
-</header>
+    <header>
+        <div class="logo-container">
+            <img src="icon/logo.png" alt="Logo" class="logo-img">
+            <span class="logo-text">GESTÃO DE BIBLIOTECA</span>
+        </div>
+    </header>
 
     <div class="container">
         
         <div class="tabs-buttons">
             <button class="btn-tab" data-tab="form-section">Cadastro/Edição</button>
-            <button class="btn-tab" data-tab="stock-section">Estoque Atual (<?php echo count($bebidas); ?>)</button>
+            <button class="btn-tab" data-tab="list-section">Acervo Atual (<?php echo count($livros); ?>)</button>
         </div>
 
         <div id="form-section" class="tab-content hidden">
-            <h1><?php echo $modoEdicao ? 'Editar Bebida' : 'Nova Bebida'; ?></h1>
+            <h1><?php echo $modoEdicao ? 'Editar Livro' : 'Novo Livro'; ?></h1>
 
             <div class="card">
                 <form method="POST">
                     <input type="hidden" name="acao" value="salvar">
                     
                     <?php if ($modoEdicao): ?>
-                        <input type="hidden" name="nome_antigo" value="<?php echo htmlspecialchars($bebidaEditando->getNome()); ?>">
+                        <input type="hidden" name="titulo_antigo" value="<?php echo htmlspecialchars($livroEditando->getTitulo()); ?>">
                     <?php endif; ?>
 
                     <div class="form-grid">
                         <div class="form-group form-full">
-                            <label>Nome:</label>
-                            <input type="text" name="nome" placeholder="Ex: Coca Cola" required 
-                                   value="<?php echo $modoEdicao ? htmlspecialchars($bebidaEditando->getNome()) : ''; ?>">
+                            <label>Título do Livro:</label>
+                            <input type="text" name="titulo" placeholder="Ex: Dom Casmurro" required 
+                                   value="<?php echo $modoEdicao ? htmlspecialchars($livroEditando->getTitulo()) : ''; ?>">
                         </div>
 
                         <div class="form-group">
-                            <label>Categoria:</label>
-                            <select name="categoria" required>
-                                <option value="">Selecione...</option>
-                                <option value="Refrigerante" <?php if($modoEdicao && $bebidaEditando->getCategoria() == 'Refrigerante') echo 'selected'; ?>>Refrigerante</option>
-                                <option value="Suco" <?php if($modoEdicao && $bebidaEditando->getCategoria() == 'Suco') echo 'selected'; ?>>Suco</option>
-                                <option value="Alcoólica" <?php if($modoEdicao && $bebidaEditando->getCategoria() == 'Alcoólica') echo 'selected'; ?>>Alcoólica</option>
-                                <option value="Água" <?php if($modoEdicao && $bebidaEditando->getCategoria() == 'Água') echo 'selected'; ?>>Água</option>
-                                <option value="Energético" <?php if($modoEdicao && $bebidaEditando->getCategoria() == 'Energético') echo 'selected'; ?>>Energético</option>
-                            </select>
+                            <label>Autor:</label>
+                            <input type="text" name="autor" placeholder="Ex: Machado de Assis" required
+                                   value="<?php echo $modoEdicao ? htmlspecialchars($livroEditando->getAutor()) : ''; ?>">
                         </div>
 
                         <div class="form-group">
-                            <label>Volume:</label>
-                            <input type="text" name="volume" placeholder="Ex: 350ml" required 
-                                   value="<?php echo $modoEdicao ? htmlspecialchars($bebidaEditando->getVolume()) : ''; ?>">
+                            <label>Ano de Publicação:</label>
+                            <input type="number" name="ano_publicacao" placeholder="Ex: 1899" required 
+                                   value="<?php echo $modoEdicao ? htmlspecialchars($livroEditando->getAno_publicacao()) : ''; ?>">
                         </div>
 
                         <div class="form-group">
-                            <label>Valor (R$):</label>
-                            <input type="number" step="0.01" name="valor" placeholder="0.00" required 
-                                   value="<?php echo $modoEdicao ? htmlspecialchars($bebidaEditando->getValor()) : ''; ?>">
+                            <label>Gênero Literário:</label>
+                            <input type="text" name="genero_literario" placeholder="Ex: Romance Realista" required 
+                                   value="<?php echo $modoEdicao ? htmlspecialchars($livroEditando->getGenero_literario()) : ''; ?>">
                         </div>
 
                         <div class="form-group">
-                            <label>Quantidade:</label>
-                            <input type="number" name="qtde" placeholder="0" required 
-                                   value="<?php echo $modoEdicao ? htmlspecialchars($bebidaEditando->getQtde()) : ''; ?>">
+                            <label>Quantidade Disponível:</label>
+                            <input type="number" name="quantidade_disponivel" placeholder="0" required 
+                                   value="<?php echo $modoEdicao ? htmlspecialchars($livroEditando->getQuantidade_disponivel()) : ''; ?>">
                         </div>
                     </div>
 
                     <button type="submit" class="btn btn-primary">
-                        <?php echo $modoEdicao ? 'SALVAR ALTERAÇÕES' : 'CADASTRAR'; ?>
+                        <?php echo $modoEdicao ? 'SALVAR ALTERAÇÕES' : 'CADASTRAR LIVRO'; ?>
                     </button>
                     
                     <?php if ($modoEdicao): ?>
-                        <a href="index.php" class="btn btn-cancel">CANCELAR</a>
+                        <a href="index.php" class="btn btn-cancel">CANCELAR EDIÇÃO</a>
                     <?php endif; ?>
                 </form>
             </div>
         </div>
 
-
-        <div id="stock-section" class="tab-content hidden">
-            <h1>Estoque Atual (<?php echo empty($searchTerm) ? count($bebidas) : count($bebidas) . ' encontrados'; ?>)</h1>
+        <div id="list-section" class="tab-content hidden">
+            <h1>Acervo (<?php echo empty($searchTerm) ? count($livros) : count($livros) . ' encontrados'; ?>)</h1>
             
             <form method="GET" class="search-form">
-                <input type="text" name="q" placeholder="Pesquisar por nome ou categoria..." 
+                <input type="text" name="q" placeholder="Pesquisar por título ou autor..." 
                        value="<?php echo htmlspecialchars($searchTerm); ?>">
                 <button type="submit" class="btn btn-search">🔍 Buscar</button> 
                 <?php if (!empty($searchTerm)): ?>
@@ -215,34 +210,34 @@ if (isset($_SESSION['message'])) {
                 <table>
                     <thead>
                         <tr>
-                            <th>Nome</th>
-                            <th>Categoria</th>
-                            <th>Volume</th>
-                            <th>Valor</th>
-                            <th>Qtde</th>
+                            <th>Título</th>
+                            <th>Autor</th>
+                            <th>Ano</th>
+                            <th>Gênero</th>
+                            <th>Estoque</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (!empty($bebidas)): ?>
-                            <?php foreach ($bebidas as $bebida): ?>
+                        <?php if (!empty($livros)): ?>
+                            <?php foreach ($livros as $livro): ?>
                                 <tr>
-                                    <td style="font-weight: 600;"><?php echo htmlspecialchars($bebida->getNome()); ?></td>
-                                    <td><?php echo htmlspecialchars($bebida->getCategoria()); ?></td>
-                                    <td><?php echo htmlspecialchars($bebida->getVolume()); ?></td>
-                                    <td style="color: var(--primary); font-weight: bold;">R$ <?php echo number_format($bebida->getValor(), 2, ',', '.'); ?></td>
-                                    <td><?php echo htmlspecialchars($bebida->getQtde()); ?></td>
+                                    <td style="font-weight: 600; color: var(--light);"><?php echo htmlspecialchars($livro->getTitulo()); ?></td>
+                                    <td><?php echo htmlspecialchars($livro->getAutor()); ?></td>
+                                    <td><?php echo htmlspecialchars($livro->getAno_publicacao()); ?></td>
+                                    <td><?php echo htmlspecialchars($livro->getGenero_literario()); ?></td>
+                                    <td style="color: var(--primary); font-weight: bold;"><?php echo htmlspecialchars($livro->getQuantidade_disponivel()); ?></td>
                                     <td>
                                         <div class="actions">
                                             <form method="POST" style="margin:0;">
                                                 <input type="hidden" name="acao" value="editar">
-                                                <input type="hidden" name="nome" value="<?php echo htmlspecialchars($bebida->getNome()); ?>">
+                                                <input type="hidden" name="titulo" value="<?php echo htmlspecialchars($livro->getTitulo()); ?>">
                                                 <button type="submit" class="btn-small btn-edit">Editar</button>
                                             </form>
                                             
                                             <button type="button" class="btn-small btn-delete" 
-                                                    data-nome-bebida="<?php echo htmlspecialchars($bebida->getNome()); ?>"
-                                                    onclick="openConfirmModal(this.getAttribute('data-nome-bebida'))">Excluir</button>
+                                                    data-titulo-livro="<?php echo htmlspecialchars($livro->getTitulo()); ?>"
+                                                    onclick="openConfirmModal(this.getAttribute('data-titulo-livro'))">Excluir</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -250,7 +245,7 @@ if (isset($_SESSION['message'])) {
                         <?php else: ?>
                             <tr>
                                 <td colspan="6" style="text-align: center; padding: 3rem; color: rgba(255,255,255,0.5);">
-                                    <?php echo empty($searchTerm) ? 'Nenhuma bebida encontrada.' : 'Nenhuma bebida corresponde à pesquisa.'; ?>
+                                    <?php echo empty($searchTerm) ? 'Nenhum livro cadastrado.' : 'Nenhum livro corresponde à pesquisa.'; ?>
                                 </td>
                             </tr>
                         <?php endif; ?>
@@ -262,9 +257,9 @@ if (isset($_SESSION['message'])) {
     </div>
 
     <script>
-        function openConfirmModal(bebidaNome) {
-            document.getElementById('bebidaParaExcluir').value = bebidaNome;
-            document.getElementById('modalConfirmMessage').innerHTML = `Tem certeza que deseja excluir a bebida <b>${bebidaNome}</b>?`;
+        function openConfirmModal(tituloLivro) {
+            document.getElementById('livroParaExcluir').value = tituloLivro;
+            document.getElementById('modalConfirmMessage').innerHTML = `Tem certeza que deseja excluir o livro <b>${tituloLivro}</b>?`;
             document.getElementById('confirmModal').classList.add('show');
         }
 
@@ -293,30 +288,28 @@ if (isset($_SESSION['message'])) {
                 });
             });
             
-            // --- MODAL STATUS LOGIC ---
             const statusModal = document.getElementById('statusModal');
             const modalStatusMessageElement = document.getElementById('modalStatusMessage');
             const modalContent = document.querySelector('#statusModal .modal-content');
             const modalIcon = document.querySelector('#statusModal .modal-icon');
 
             const showModalStatus = <?php echo json_encode($showModalStatus); ?>;
-            const modalType = <?php echo json_encode($modalType); ?>; // 'success' ou 'error'
+            const modalType = <?php echo json_encode($modalType); ?>; 
             const modalText = <?php echo json_encode($modalText); ?>;
             
             const modoEdicao = <?php echo json_encode($modoEdicao); ?>;
             const searchTerm = <?php echo json_encode($searchTerm); ?>;
 
-            let initialTabId = 'stock-section';
+            let initialTabId = 'list-section';
             if (modoEdicao) {
                 initialTabId = 'form-section'; 
             } else if (showModalStatus || searchTerm) {
-                 initialTabId = 'stock-section'; 
+                 initialTabId = 'list-section'; 
             }
 
             if (showModalStatus) {
                  modalStatusMessageElement.textContent = modalText;
                  
-                 // Remove classes antigas e aplica a correta
                  modalContent.classList.remove('modal-type-success', 'modal-type-error');
                  
                  if (modalType === 'success') {
