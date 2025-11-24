@@ -23,8 +23,6 @@ class Livro {
     public function setAutor($autor)
     {
         $this->autor = $autor;
-
-        return $this;
     }
 
     public function getTitulo()
@@ -35,8 +33,6 @@ class Livro {
     public function setTitulo($titulo)
     {
         $this->titulo = $titulo;
-
-        return $this;
     }
 
     public function getAno_publicacao()
@@ -47,8 +43,6 @@ class Livro {
     public function setAno_publicacao($ano_publicacao)
     {
         $this->ano_publicacao = $ano_publicacao;
-
-        return $this;
     }
 
     public function getGenero_literario()
@@ -60,7 +54,6 @@ class Livro {
     {
         $this->genero_literario = $genero_literario;
 
-        return $this;
     }
 
     public function getQuantidade_disponivel()
@@ -72,7 +65,6 @@ class Livro {
     {
         $this->quantidade_disponivel = $quantidade_disponivel;
 
-        return $this;
     }
 }
 ?>
