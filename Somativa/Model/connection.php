@@ -10,7 +10,6 @@ class Connection {
                 $user = 'root';
                 $pass = '1234';
 
-                // Conecta ao MySQL
                 self::$instance = new PDO(
                     "mysql:host=$host;charset=utf8",
                     $user,
